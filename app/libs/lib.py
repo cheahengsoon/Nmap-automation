@@ -64,7 +64,7 @@ def is_weak_kex_DHE(cipher_name:str,cipherdict:dict)->bool:
     # Look for 'SHA' in the cipher name (indicating use of SHA-1)
     if cipher_name.startswith('TLS_AKE_'):
             return False
-    elif cipherdict[cipher_name][0]['kex_algorithm'] == "DHE":
+    elif cipherdict[cipher_name][0]["kex_algorithm"] == "DHE":
         return True
     return False
 
@@ -72,4 +72,4 @@ def is_weak_tls_version(tls_name:str)->str:
     if tls_name in ['TLSv1.2','TLSv1.3']:
         return ''
     else: 
-        return tls_name
+        return tls_name 
