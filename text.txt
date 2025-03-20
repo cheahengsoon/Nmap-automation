@@ -1,0 +1,13 @@
+The following insecure TLS configurations were identified on the affected hosts:
+a)	Deprecated TLS version 1.0 and 1.1 are supported
+TLS v1.0 and v1.1 are susceptible to multiple cryptographic design issues and do not support the latest recommended cipher suites that contains encryption before MAC computation, and authenticated encryption modes (e.g., GCM). 
+b)	Weak RSA key exchange algorithm supported
+Ciphers using weak RSA key exchange algorithm are vulnerable to informational disclosure attack called ROBOT. Also, RSA does not support Perfect Forward Secrecy (PFS).
+c)	Non-ephemeral key exchange algorithm supported
+Non-ephemeral key exchange is less secure than ephemeral key exchange because communications can be decrypted if the long-term keys that are being used in the exchange are compromised. In addition, non-ephemeral keys do not support Perfect Forward Secrecy (PFS).
+d)	Weak hashing algorithm supported
+The affected host supports the use of weak MD5 and SHA-1 hashing algorithm. These algorithms are considered insecure by cryptographic community, as they are vulnerable to collision attacks.
+e)	Cipher block chaining (CBC) mode cipher encryption enabled.
+Ciphers using CBC mode are now considered weak due to several padding oracle attacks. This may allow an attacker to recover the plaintext message from the ciphertext. Also, CBC mode ciphers do not support authenticated encryption with associated data (AEAD).
+f)	Weak Diffie Hellman Ephemeral (DHE) key exchange supported
+Ciphers using DHE key exchange are considered weak due to a particularity of the algorithm that allows attackers to perform denial-of-service attack with a low-bandwidth connection without authentication, privilege, or user interaction.
