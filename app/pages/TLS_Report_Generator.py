@@ -63,10 +63,6 @@ def parse_logic(uploaded_file):
         st.warning(f"Unknown Error : {uploaded_file}: {e.__traceback__}")
     return cipher_list
 
-
-
-
-
 uploaded_files = st.file_uploader("Upload Nmap Files (XML):", accept_multiple_files=True)
 
 if uploaded_files:
@@ -126,7 +122,7 @@ if st.session_state['tls_cipher_eval']:
     'is_weak_hashalg_MD5SHA1': lambda x: '✓' if 'Y' in x.values else '',
     'is_weak_encalg_cbc': lambda x: '✓' if 'Y' in x.values else '',
     'is_weak_kex_DHE': lambda x: '✓' if 'Y' in x.values else '',
-   'is_weak_encalg_sweet32': lambda x: '✓' if 'Y' in x.values else '',
+    'is_weak_encalg_sweet32': lambda x: '✓' if 'Y' in x.values else '',
     'is_weak_tls_version': lambda x: '\n'.join(x.astype(str).unique()),
     }).reset_index()
 
