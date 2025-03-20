@@ -14,13 +14,12 @@ def get_cipher_security_info()->dict:
 def is_weak_encalg_sweet32(cipher_name:str,cipherdict:dict)->bool:
     """Check if the cipher is vulnerable to Sweet32 based on the cipher name."""
     # Vulnerable ciphers are those that use 64-bit block ciphers like 3DES and RC4
-    vulnerable_ciphers = ['3DES', 'RC4']
-
+    enc_algs = ['3DES', 'RC4']
+    if cipher_name.startswith('TLS_AKE_'):
+        return False
     # If the Encryption Algorithm contains "3DES" or "RC4", it's vulnerable to Sweet32
-    for cipher in vulnerable_ciphers:
-        if cipher.startswith('TLS_AKE_'):
-            return False
-        elif cipher in cipherdict[cipher_name][0]['enc_algorithm']:
+    for enc_alg in enc_algs:
+        if enc_alg in cipherdict[cipher_name][0]['enc_algorithm']:
             return True
     return False
 
@@ -64,7 +63,7 @@ def is_weak_kex_DHE(cipher_name:str,cipherdict:dict)->bool:
     # Look for 'SHA' in the cipher name (indicating use of SHA-1)
     if cipher_name.startswith('TLS_AKE_'):
             return False
-    elif cipherdict[cipher_name][0]["kex_algorithm"] == "DHE":
+    elif cipherdict[cipher_name][0]['kex_algorithm'] == "DHE":
         return True
     return False
 
@@ -72,4 +71,4 @@ def is_weak_tls_version(tls_name:str)->str:
     if tls_name in ['TLSv1.2','TLSv1.3']:
         return ''
     else: 
-        return tls_name 
+        return tls_name
