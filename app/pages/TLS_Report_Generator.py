@@ -96,7 +96,8 @@ if st.session_state['files_uploaded']:
     if all_ciphers:
         cipher_df = pd.DataFrame(all_ciphers, columns=["IP Address", "Port", "Cipher Name","Kex_info", "TLS Version", "Security"])
         st.write("SSL Enum Cipher Evaluation Result")
-        st.dataframe(cipher_df)
+        with st.expander("Debug Dev Info",icon="🕵️‍♀️"):
+            st.dataframe(cipher_df)
         st.session_state['tls_cipher_eval'] = True
     else:
         st.warning("No cipher details found in the uploaded XML files.")
@@ -126,4 +127,7 @@ if st.session_state['tls_cipher_eval']:
     'is_weak_tls_version': lambda x: '\n'.join(x.astype(str).unique()),
     }).reset_index()
 
+    weak_ciphers_list = pd.DataFrame()
+    weak_ciphers_list['Weak Ciphers'] = insecure_df[insecure_df['TLS Version'] != 'TLSv1.3']['Cipher Name'].unique()
+    st.dataframe(weak_ciphers_list)
     st.dataframe(summary_df)
