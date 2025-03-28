@@ -1,0 +1,12 @@
+services:
+  nmap-report-automation:
+    build: 
+      dockerfile: streamlit.dockerfile
+      context: .
+    volumes:
+      - ./app:/app:ro
+    working_dir: /app
+    ports:
+      - 8111:80/tcp
+    command: ["streamlit", "run", "Home.py", "--server.port=80", "--server.address=0.0.0.0"]
+      

@@ -6,18 +6,13 @@ import requests
 import json
 import streamlit as st
 import re
+from libs.lib import *
 
-def get_cipher_security_info():
-    try:
-        req = requests.get('https://ciphersuite.info/api/cs')
-        data = json.loads(req.text)['ciphersuites']
-        cipherdict = {}
-        for cipher in data:
-            cipherdict["".join(cipher.keys())] = list(cipher.values())
-        return cipherdict
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching cipher security info: {e}")
-        return {}
+# Set the layout to wide mode
+st.set_page_config(layout="wide", page_title="Prowler Parser",  page_icon="🤷‍♂️", initial_sidebar_state="auto", menu_items=None)
+pd.set_option("display.max_rows", None)
+
+
 
 def perform_nmap_scan(ip, scan_type):
     st.write(f"\nStarting {scan_type} scan for {ip}...\n")
@@ -141,60 +136,20 @@ def main():
 
     cipherdict = get_cipher_security_info()
 
-    option = st.radio("Choose an option:", ("Scan a new IP", "Upload an existing SSL cipher file"))
 
-    if option == "Scan a new IP":
-        ip = st.text_input("Enter the IP address to scan:")
-        scan_type = st.selectbox("Do you want to run a 'full' scan (-p-) or a 'detailed' scan (-sC -sV)?", ['full', 'detailed'])
+    ip = st.text_input("Enter the IP address to scan:")
+    scan_type = st.selectbox("Do you want to run a 'full' scan (-p-) or a 'detailed' scan (-sC -sV)?", ['full', 'detailed'])
 
-        if st.button('Start Scan'):
-            if ip:
-                perform_nmap_scan(ip, scan_type)
-                nmap_results_file = f"{ip}-{'full' if scan_type == 'full' else 'detailed'}-scan.xml"
-                open_services = parse_nmap_results(ip, nmap_results_file)
+    if st.button('Start Scan'):
+        if ip:
+            perform_nmap_scan(ip, scan_type)
+            nmap_results_file = f"{ip}-{'full' if scan_type == 'full' else 'detailed'}-scan.xml"
+            open_services = parse_nmap_results(ip, nmap_results_file)
 
-                for port_id, service_name in open_services:
-                    run_nse_script(ip, port_id, service_name, cipherdict)
-            else:
-                st.error("Please provide a valid IP address.")
-
-    elif option == "Upload an existing SSL cipher file":
-        uploaded_files = st.file_uploader("Upload your SSL cipher file (XML):", type=["xml"], accept_multiple_files=True)
-
-        if uploaded_files:
-            all_ciphers = []
-        
-            for uploaded_file in uploaded_files:
-                try:
-                    tree = ET.parse(uploaded_file)
-                    root = tree.getroot()
-                    ip_address = root.find(".//address[@addrtype='ipv4']").attrib['addr']
-                    hostnames = [hostname.text for hostname in root.findall(".//hostnames/hostname")]
-                    for port in root.findall(".//ports/port"):
-                        port_id = port.attrib['portid']
-                        script = port.find(".//script[@id='ssl-enum-ciphers']")
-        
-                        if script is not None:
-                            for tls_version in ["TLSv1.0", "TLSv1.1", "TLSv1.2", "TLSv1.3"]:
-                                version_table = script.findall(f".//table[@key='{tls_version}']")
-        
-                                for table in version_table:
-                                    cipher_table = table.find(".//table[@key='ciphers']")
-                                    for cipher in cipher_table.findall("table"):
-                                        cipher_name = cipher.find(".//elem[@key='name']").text
-                                        kex_info = cipher.find(".//elem[@key='kex_info']").text
-                                        strength = cipher.find(".//elem[@key='strength']").text
-                                        security = cipherdict.get(cipher_name, [{"security": "Unknown"}])[0]['security']
-                                        all_ciphers.append([ip_address, port_id, cipher_name, kex_info, strength, tls_version, security])
-        
-                except ET.ParseError as e:
-                    st.error(f"Error parsing XML file {uploaded_file.name}: {e}")
-        
-            if all_ciphers:
-                df = pd.DataFrame(all_ciphers, columns=["IP Address", "Port", "Cipher", "Key Exchange", "Strength", "TLS Version", "Security"])
-                st.dataframe(df)
-            else:
-                st.warning("No cipher details found in the uploaded XML files.")
+            for port_id, service_name in open_services:
+                run_nse_script(ip, port_id, service_name, cipherdict)
+        else:
+            st.error("Please provide a valid IP address.")        
 
 if __name__ == "__main__":
     main()
